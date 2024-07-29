@@ -22,25 +22,31 @@ class MyApp extends StatelessWidget {
 }
 
 class GameOfLife extends StatelessWidget {
-  GameOfLife ({super.key, required this.title});
+  GameOfLife({super.key, required this.title});
   final String title;
-  
+
   // Board
   final GlobalKey<BoardState> _boardStateKey = GlobalKey<BoardState>();
 
   @override
-  Widget build(BuildContext context){
-
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title)
-      ),
+      appBar: AppBar(title: Text(title)),
       body: Column(
         children: [
           Board(key: _boardStateKey, column: 50, row: 50),
-          ElevatedButton(onPressed: (){
-              _boardStateKey.currentState?.resetCells();
-          }, child: const Text('Reset'))
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+              ElevatedButton(
+                  onPressed: () => _boardStateKey.currentState?.resetCells(),
+                  child: const Text('Reset')),
+                ElevatedButton(
+                    onPressed: ()=> _boardStateKey.currentState?.pause(),
+                    child: const Icon(Icons.play_arrow) 
+                    )
+          //   ],
+          // )
         ],
       ),
     );

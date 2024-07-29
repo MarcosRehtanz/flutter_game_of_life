@@ -43,6 +43,22 @@ class BoardState extends State<Board> {
     super.dispose();
   }
 
+  Icon iconPause() {
+    return _timer.isActive
+        ? const Icon(Icons.pause)
+        : const Icon(Icons.play_arrow);
+  }
+
+  pause() {
+    if (_timer.isActive) {
+      _timer.cancel();
+    } else {
+      _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+        updateCells();
+      });
+    }
+  }
+
   resetCells() {
     _cells = widget._initialCells ??
         List.generate(
@@ -52,7 +68,8 @@ class BoardState extends State<Board> {
   }
 
   updateCells() {
-    List<List<Cell>> updateCells = _cells.map((row) => row.map((cell) => cell).toList()).toList();
+    List<List<Cell>> updateCells =
+        _cells.map((row) => row.map((cell) => cell).toList()).toList();
 
     for (var row = 0; row < _cells.length; row++) {
       bool top = row > 0;
@@ -88,13 +105,13 @@ class BoardState extends State<Board> {
         int count = 0;
         for (var cell in list) {
           cell.isAlive ? ++count : count;
-        } 
-        if(_cells[row][col].isAlive){
-          if(count < 2 || count > 3) {
+        }
+        if (_cells[row][col].isAlive) {
+          if (count < 2 || count > 3) {
             updateCells[row][col].die();
           }
         } else {
-          if(count == 3){
+          if (count == 3) {
             updateCells[row][col].revive();
           }
         }
