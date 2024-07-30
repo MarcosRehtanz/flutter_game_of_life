@@ -3,7 +3,7 @@ import 'dart:math';
 class Cell {
   bool _isAlive;
   
-  Cell.fromRandomLifeStatus() : _isAlive = Random().nextInt(20) == 0;
+  Cell.fromRandomLifeStatus() : _isAlive = Random().nextInt(10) == 0;
 
   Cell(this._isAlive);
 

@@ -25,15 +25,17 @@ class Board extends StatefulWidget {
 class BoardState extends State<Board> {
   late List<List<Cell>> _cells;
   late Timer _timer;
+  late bool _isPlaying = true;
+  late Icon _iconPlayPause = Icon(Icons.play_arrow);
 
   List<List<Cell>> get cells => _cells;
+  bool get isPlaying => _isPlaying;
+  Icon get iconPlayPause => _iconPlayPause;
 
   @override
   void initState() {
     resetCells();
-    _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      updateCells();
-    });
+    startTimer();
     super.initState();
   }
 
@@ -43,20 +45,27 @@ class BoardState extends State<Board> {
     super.dispose();
   }
 
-  Icon iconPause() {
-    return _timer.isActive
-        ? const Icon(Icons.pause)
-        : const Icon(Icons.play_arrow);
+  togglePlayPause() {
+    setState(() {
+      _isPlaying = !_isPlaying;
+      
+      if (_isPlaying) {
+         _iconPlayPause = Icon(Icons.pause);
+        startTimer();
+      } else {
+        _iconPlayPause = Icon(Icons.play_arrow);
+        stopTimer();
+      }
+    });
   }
 
-  pause() {
-    if (_timer.isActive) {
-      _timer.cancel();
-    } else {
-      _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
-        updateCells();
-      });
-    }
+  stopTimer(){
+    _timer.cancel();
+  }
+  startTimer(){
+    _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+          updateCells();
+        });
   }
 
   resetCells() {
