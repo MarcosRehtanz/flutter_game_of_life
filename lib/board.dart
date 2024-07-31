@@ -25,17 +25,17 @@ class Board extends StatefulWidget {
 class BoardState extends State<Board> {
   late List<List<Cell>> _cells;
   late Timer _timer;
-  late bool _isPlaying = true;
-  late Icon _iconPlayPause = Icon(Icons.play_arrow);
+  late bool _isPlaying = false;
+  late IconData _iconPlayPause = Icons.play_arrow;
 
   List<List<Cell>> get cells => _cells;
   bool get isPlaying => _isPlaying;
-  Icon get iconPlayPause => _iconPlayPause;
+  IconData get iconPlayPause => _iconPlayPause;
 
   @override
   void initState() {
     resetCells();
-    startTimer();
+    // startTimer();
     super.initState();
   }
 
@@ -46,39 +46,101 @@ class BoardState extends State<Board> {
   }
 
   togglePlayPause() {
+    if (_isPlaying) {
+      setState(() {
+        _isPlaying = false;
+        _iconPlayPause = Icons.play_arrow;
+      });
+      startTimer();
+    } else {
+      setState(() {
+        _isPlaying = true;
+        _iconPlayPause = Icons.pause;
+      });
+      stopTimer();
+    }
+  }
+
+  stopTimer() {
+    _timer.cancel();
+  }
+
+  startTimer() {
     setState(() {
-      _isPlaying = !_isPlaying;
-      
-      if (_isPlaying) {
-         _iconPlayPause = Icon(Icons.pause);
-        startTimer();
-      } else {
-        _iconPlayPause = Icon(Icons.play_arrow);
-        stopTimer();
-      }
+      _timer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
+        updateCells();
+      });
     });
   }
 
-  stopTimer(){
-    _timer.cancel();
-  }
-  startTimer(){
-    _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
-          updateCells();
-        });
+  resetCells() {
+    setState(() {
+      _cells = widget._initialCells ??
+          List.generate(
+              widget._row,
+              (row) => List.generate(
+                  widget._column, (cell) => Cell.fromRandomLifeStatus()));
+    });
   }
 
-  resetCells() {
-    _cells = widget._initialCells ??
-        List.generate(
-            widget._row,
-            (row) => List.generate(
-                widget._column, (cell) => Cell.fromRandomLifeStatus()));
+  clearCells() {
+    setState(() {
+      _cells = widget._initialCells ??
+          List.generate(widget._row,
+              (row) => List.generate(widget._column, (cell) => Cell(false)));
+    });
   }
 
   updateCells() {
-    List<List<Cell>> updateCells =
-        _cells.map((row) => row.map((cell) => cell).toList()).toList();
+    List<List<Cell>> updateCells = List.generate(
+        _cells.length,
+        (row) => List.generate(_cells[row].length, (col) {
+              bool top = row > 0;
+              bool bot = row < _cells.length - 1;
+              bool left = col > 0;
+              bool right = col < _cells[row].length - 1;
+
+              List<Cell> list = [];
+              if (top) {
+                list.add(_cells[row - 1][col]);
+                if (left) {
+                  list.add(_cells[row - 1][col - 1]);
+                }
+                if (right) {
+                  list.add(_cells[row - 1][col + 1]);
+                }
+              }
+              if (left) {
+                list.add(_cells[row][col - 1]);
+              }
+              if (right) {
+                list.add(_cells[row][col + 1]);
+              }
+              if (bot) {
+                list.add(_cells[row + 1][col]);
+                if (left) {
+                  list.add(_cells[row + 1][col - 1]);
+                }
+                if (right) {
+                  list.add(_cells[row + 1][col + 1]);
+                }
+              }
+              int count = 0;
+              bool isAlive = _cells[row][col].isAlive;
+              for (var cell in list) {
+                cell.isAlive ? ++count : count;
+              }
+              if (isAlive) {
+                if (count < 2 || count > 3) {
+                  return Cell(false);
+                }
+              } else {
+                if (count == 3) {
+                  return Cell(true);
+                }
+              }
+              return Cell(_cells[row][col].isAlive);
+            }));
 
     for (var row = 0; row < _cells.length; row++) {
       bool top = row > 0;
@@ -138,13 +200,19 @@ class BoardState extends State<Board> {
         for (var row in _cells)
           Row(children: [
             for (var cell in row)
-              Container(
-                  width: 10.0,
-                  height: 10.0,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 0.5),
-                    color: cell.isAlive ? Colors.blue : Colors.white,
-                  ))
+              GestureDetector(
+                  onTap: () => {
+                        setState(() {
+                          cell.invert();
+                        })
+                      },
+                  child: Container(
+                      width: 10.0,
+                      height: 10.0,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey, width: 0.5),
+                        color: cell.isAlive ? Colors.blue : Colors.white,
+                      )))
           ])
       ],
     );

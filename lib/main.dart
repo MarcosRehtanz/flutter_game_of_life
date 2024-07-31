@@ -30,25 +30,30 @@ class GameOfLife extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Icon iconPlayPause = _boardStateKey.currentState?.iconPlayPause ?? Icon(Icons.play_arrow);
-
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: Column(
         children: [
           Board(key: _boardStateKey, column: 50, row: 50),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.center,
-          //   children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed: () => _boardStateKey.currentState?.clearCells(),
+                icon: const Icon(Icons.clear),
+              ),
               ElevatedButton(
                   onPressed: () => _boardStateKey.currentState?.resetCells(),
                   child: const Text('Reset')),
-                ElevatedButton(
-                    child: iconPlayPause,
-                    onPressed: ()=> _boardStateKey.currentState?.togglePlayPause(),
-                    )
-          //   ],
-          // )
+              ElevatedButton(
+                child: Icon(_boardStateKey.currentState?.iconPlayPause),
+                onPressed: () => _boardStateKey.currentState?.togglePlayPause(),
+              ),
+              ElevatedButton(
+                  onPressed: () => _boardStateKey.currentState?.updateCells(),
+                  child: const Text('Next'))
+            ],
+          )
         ],
       ),
     );
